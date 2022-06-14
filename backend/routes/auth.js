@@ -53,7 +53,9 @@ router.post('/',[
 
 
 router.get("/login/success", (req, res) => {
+  console.log("/login/success");
   if (req.user) {
+    
     res.status(200).json({
       success: true,
       message: "successfull",
@@ -73,10 +75,11 @@ router.get("/login/failed", (req, res) => {
 
 router.get("/logout", (req, res) => {
   req.logout();
+  console.log("logout");
   res.redirect("http://localhost:3000");
 });
 
-router.get("/google", passport.authenticate("google", { scope: ["profile"] }));
+router.get("/google", passport.authenticate("google", { scope: ["email","profile"] }));
 
 router.get(
   "/google/callback",

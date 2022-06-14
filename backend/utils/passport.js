@@ -7,7 +7,7 @@ dotenv.config();
 
 // For session //
 
-passport.serializeUser((user, done) => {   done(null, user.id); });
+passport.serializeUser((user, done) => {   done(null, user); });
  
 passport.deserializeUser((id, done) => {  
       User.findById(id).then((user) => {
@@ -18,25 +18,34 @@ passport.deserializeUser((id, done) => {
 passport.use(
       new GoogleStrategy(
         {
-          clientID: process.env.GOOGLE_CLIENT_ID,
-          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          clientID: process.env.GOOGLE_CLIENT_ID1,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET1,
           callbackURL: "/auth/google/callback",
         },
-            (accessToken, refreshToken, profile, done) => {
+            async(accessToken, refreshToken, profile, done) => {
                   console.log("start   \n");
-                  console.log(profile);
-             const existingUser = User.findOne({ username:profile.displayName})
+                  // console.log(profile);
+                  // console.log(profile.emails[0].value);
+
+                  // User.findOrCreate({ googleId: profile.id }, function (err, user) {
+                  //       return cb(err, user);
+                  //     });
+
+             const existingUser = await User.findOne({email:profile.emails[0].value})
+             console.log("existingUser  ",existingUser);
              if(existingUser){
                   console.log("success1\n");
-                  done(null, profile);
+                
+                 return done(null, existingUser);
              }
              else{
-                  console.log("success2\n");
-                  new User({ googleId: profile.id ,
+                  console.log("success2"  ,profile.id);
+                 const user= new User({ googleId: profile.id ,
                         username:profile.displayName,
+                        email:profile.emails[0].value
                   })
-                  .save()
-                  done(null, profile)
+                  await user.save();
+                  return done(null, user)
              }
             //.then((existingUser) => {
             //     if (existingUser) {
